@@ -26,7 +26,7 @@ num_ball(n).
 %  3)the ball A is on the gripper
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-{ pickup(G,A,T)  : grip(G), ball(A), time(T)  }:-
+pickup(G,A,T)  : grip(G), ball(A), time(T) :-
         free(G,T),
         at(robot,R1,T),
         at(A,R1,T),
@@ -35,9 +35,10 @@ num_ball(n).
 
 on(A,G,T+1):- pickup(G,A,T).
 
-{ at(robot,R1,T+1) : room(R1)} :- at(robot,R1,T), pickup(G,A,T).
+at(robot,R1,T+1) :- at(robot,R1,T), pickup(G,A,T).
 
-{ free(G,T) : grip(G),time(T) }:- not holding(G,T).
+free(G,T) :- grip(G), time(T),
+             not holding(G,T).
 
 change(A,T)  :- pickup(G,A,T).
 
