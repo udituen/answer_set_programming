@@ -40,7 +40,12 @@ at(robot,R1,T+1):-
         at(robot,R1,T),
         pickup(G,A,T).
 
-{free(G,T) }:- 
+{ holding(G,T) }:- 
+        not free(G,T),
+        grip(G),
+        time(T).
+
+{free(G,T)}:- 
         not holding(G,T),
         grip(G),
         time(T).
