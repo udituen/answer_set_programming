@@ -11,6 +11,9 @@ time(t).
 num_gripper(m).
 num_ball(n).
 
+% #show pickup/3.
+% #show putdown/3.
+% #show move/4.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % action: the gripper pick up ball A
@@ -25,32 +28,33 @@ num_ball(n).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 { pickup(G,A,T) }:-
+        grip(G),ball(A),time(T),
         free(G,T),
         at(robot,R1,T),
         at(A,R1,T),
         not moving(robot,T),
-        not goal(T),
-        grip(G),
-        ball(A).
+        not goal(T).
 
 on(A,G,T+1):-
-        pickup(G,A,T).
+        pickup(G,A,T),
+        grip(G),
+        ball(A),
+        time(T).
 
 at(robot,R1,T+1):-
+        room(R1),
+        time(T),
         at(robot,R1,T),
         pickup(G,A,T).
 
-{ holding(G,T) }:- 
-        not free(G,T),
+free(G,T):- 
         grip(G),
-        time(T).
-
-{free(G,T)}:- 
-        not holding(G,T),
-        grip(G),
-        time(T).
+        time(T),
+        not holding(G,T).
 
 change(A,T):-
+        ball(A),
+        time(T),
         pickup(G,A,T).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -66,25 +70,30 @@ change(A,T):-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 {putdown(G,A,T)}:-
+        grip(G),ball(A),time(T),
         at(robot,R,T),
         not moving(robot,T),
         on(A,G,T).
 
 at(robot,R,T+1):-
+        room(R), time(T),
         at(robot,R,T),
         putdown(G,A,T).
 
 free(G,T+1):-
+        grip(G), time(T),
         putdown(G,A,T).
 
 at(A,R,T+1):-
+        room(R),ball(A),time(T),
         at(robot,R,T),
         putdown(G,A,T).
 
 in_room(R,N-1,T+1):-
+        room(R),num_ball(N),time(T),
         at(robot,R,T),
-        putdown(G,A,T),
-        num_ball(N).
+        putdown(G,A,T).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % action: move the robot from room R1 to room R2
@@ -96,11 +105,12 @@ in_room(R,N-1,T+1):-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 {move(robot,R1,R2,T)}:-
-        room(R2),
+        room(R2), room(R1),time(T),
         at(robot,R1,T),
         R1 != R2.
 
 at(robot,R2,T+1):-
+        room(R2),time(T),
         move(robot,R1,R2,T).
 
 
@@ -110,9 +120,11 @@ at(robot,R2,T+1):-
 
 
 at(A,R1,T+1):-
+        room(R1),ball(A),time(T),
         at(A,R1,T),
         not change(A,T).
 on(A,G,T+1):-
+        grip(G),ball(A),time(T),
         on(A,G,T),
         not change(A,T).
 
@@ -134,7 +146,8 @@ on(A,G,T+1):-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 moving(robot,T) :- move(robot,R1,R2,T).
-
+holding(G,T) :- pickup(G,A,T),
+                grip(G),time(T).
 
 goal(T+1):- goal(T).
 
@@ -153,10 +166,8 @@ goal:- goal(T).
 % #defined ball/1.
 % #defined holding/2.
 
-
-#show pickup/3.
-#show putdown/3.
 #show move/4.
+
 
 
 
